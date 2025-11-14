@@ -3,6 +3,8 @@ import { Search, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ItemFormModal } from '@/components/items/ItemFormModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -20,7 +22,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const mockItems = [
+interface Item {
+  id: string;
+  name: string;
+  code: string;
+  category: string;
+  supplier: string;
+  categoryId?: string;
+  supplierId?: string;
+  stock: number;
+  minStock: number;
+  unit: string;
+  image: any;
+}
+
+const mockItems: Item[] = [
   { id: '1', name: 'Laptop Dell XPS 15', code: 'LAP-001', category: 'Electronics', supplier: 'PT. Tech Solutions', stock: 25, minStock: 10, unit: 'pcs', image: null },
   { id: '2', name: 'Office Chair Ergonomic', code: 'FUR-001', category: 'Furniture', supplier: 'CV. Furniture Indo', stock: 50, minStock: 20, unit: 'pcs', image: null },
   { id: '3', name: 'Printer HP LaserJet', code: 'ELC-001', category: 'Electronics', supplier: 'PT. Tech Solutions', stock: 8, minStock: 10, unit: 'pcs', image: null },
@@ -28,13 +44,57 @@ const mockItems = [
   { id: '5', name: 'Wireless Mouse Logitech', code: 'ELC-002', category: 'Electronics', supplier: 'PT. Tech Solutions', stock: 45, minStock: 20, unit: 'pcs', image: null },
 ];
 
+const mockCategories = [
+  { id: '1', name: 'Electronics' },
+  { id: '2', name: 'Furniture' },
+  { id: '3', name: 'Office Supplies' },
+  { id: '4', name: 'Tools' },
+];
+
+const mockSuppliers = [
+  { id: '1', name: 'PT. Tech Solutions' },
+  { id: '2', name: 'CV. Furniture Indo' },
+  { id: '3', name: 'Toko Alat Kantor' },
+];
+
 const categories = ['All Categories', 'Electronics', 'Furniture', 'Office Supplies', 'Tools'];
 const suppliers = ['All Suppliers', 'PT. Tech Solutions', 'CV. Furniture Indo', 'Toko Alat Kantor'];
 
 export const ItemsListPage = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedSupplier, setSelectedSupplier] = useState('All Suppliers');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<typeof mockItems[0] | null>(null);
+
+  const handleAddItem = () => {
+    setEditingItem(null);
+    setModalOpen(true);
+  };
+
+  const handleEditItem = (item: typeof mockItems[0]) => {
+    setEditingItem({
+      ...item,
+      categoryId: mockCategories.find(c => c.name === item.category)?.id || '1',
+      supplierId: mockSuppliers.find(s => s.name === item.supplier)?.id || '1',
+    });
+    setModalOpen(true);
+  };
+
+  const handleSubmitItem = (data: any) => {
+    if (editingItem) {
+      toast({
+        title: 'Item Updated',
+        description: 'Item has been updated successfully.',
+      });
+    } else {
+      toast({
+        title: 'Item Added',
+        description: 'New item has been added successfully.',
+      });
+    }
+  };
 
   const filteredItems = mockItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -52,7 +112,7 @@ export const ItemsListPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Items</h1>
           <p className="text-muted-foreground">Manage your inventory items</p>
         </div>
-        <Button>
+        <Button onClick={handleAddItem}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Item
         </Button>
@@ -143,7 +203,7 @@ export const ItemsListPage = () => {
                     <TableCell className="text-muted-foreground">{item.unit}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditItem(item)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon">
@@ -158,6 +218,15 @@ export const ItemsListPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ItemFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        item={editingItem}
+        onSubmit={handleSubmitItem}
+        categories={mockCategories}
+        suppliers={mockSuppliers}
+      />
     </div>
   );
 };

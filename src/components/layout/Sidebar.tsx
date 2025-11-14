@@ -29,13 +29,15 @@ const menuItems = [
 ];
 
 export const Sidebar = () => {
-  const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { sidebarCollapsed, toggleSidebar, mobileMenuOpen, setMobileMenuOpen } = useUIStore();
 
   return (
     <aside
       className={cn(
         'fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300',
-        sidebarCollapsed ? 'w-16' : 'w-64'
+        'lg:translate-x-0',
+        sidebarCollapsed ? 'w-16' : 'w-64',
+        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}
     >
       <div className="flex h-full flex-col">
@@ -49,7 +51,7 @@ export const Sidebar = () => {
           )}
           <button
             onClick={toggleSidebar}
-            className="rounded-lg p-1.5 text-sidebar-foreground hover:bg-sidebar-accent"
+            className="hidden lg:block rounded-lg p-1.5 text-sidebar-foreground hover:bg-sidebar-accent"
           >
             {sidebarCollapsed ? (
               <ChevronRight className="h-5 w-5" />
@@ -65,6 +67,7 @@ export const Sidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={() => setMobileMenuOpen(false)}
               className={({ isActive }) =>
                 cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
@@ -72,7 +75,7 @@ export const Sidebar = () => {
                   isActive
                     ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                     : 'text-sidebar-foreground',
-                  sidebarCollapsed && 'justify-center'
+                  sidebarCollapsed && 'lg:justify-center'
                 )
               }
             >

@@ -5,10 +5,18 @@ import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
 
 export const DashboardLayout = () => {
-  const { sidebarCollapsed } = useUIStore();
+  const { sidebarCollapsed, mobileMenuOpen, setMobileMenuOpen } = useUIStore();
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Overlay for mobile */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
       <Sidebar />
       <div
         className={cn(

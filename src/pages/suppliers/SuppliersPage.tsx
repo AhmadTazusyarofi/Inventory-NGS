@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SupplierFormModal } from '@/components/suppliers/SupplierFormModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -43,6 +45,34 @@ const mockSuppliers = [
 ];
 
 export const SuppliersPage = () => {
+  const { toast } = useToast();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<typeof mockSuppliers[0] | null>(null);
+
+  const handleAddSupplier = () => {
+    setEditingSupplier(null);
+    setModalOpen(true);
+  };
+
+  const handleEditSupplier = (supplier: typeof mockSuppliers[0]) => {
+    setEditingSupplier(supplier);
+    setModalOpen(true);
+  };
+
+  const handleSubmitSupplier = (data: any) => {
+    if (editingSupplier) {
+      toast({
+        title: 'Supplier Updated',
+        description: 'Supplier has been updated successfully.',
+      });
+    } else {
+      toast({
+        title: 'Supplier Added',
+        description: 'New supplier has been added successfully.',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -50,7 +80,7 @@ export const SuppliersPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Suppliers</h1>
           <p className="text-muted-foreground">Manage your suppliers</p>
         </div>
-        <Button>
+        <Button onClick={handleAddSupplier}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Supplier
         </Button>
@@ -95,7 +125,7 @@ export const SuppliersPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditSupplier(supplier)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon">
@@ -110,6 +140,13 @@ export const SuppliersPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <SupplierFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        supplier={editingSupplier}
+        onSubmit={handleSubmitSupplier}
+      />
     </div>
   );
 };

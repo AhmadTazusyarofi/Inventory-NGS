@@ -1,8 +1,5 @@
-import { Sun, Moon, User, LogOut, Menu } from 'lucide-react';
-import { useThemeStore } from '@/store/themeStore';
-import { useAuthStore } from '@/store/authStore';
-import { useUIStore } from '@/store/uiStore';
-import { useNavigate } from 'react-router-dom';
+import { Bell, Sun, Moon, User, LogOut, Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +8,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { useThemeStore } from '@/store/themeStore';
+import { useAuthStore } from '@/store/authStore';
+import { useUIStore } from '@/store/uiStore';
+import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const { theme, toggleTheme } = useThemeStore();
   const { user, logout } = useAuthStore();
-  const { toggleSidebar } = useUIStore();
+  const { mobileMenuOpen, toggleMobileMenu } = useUIStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -25,15 +25,15 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
-          onClick={toggleSidebar}
           className="lg:hidden"
+          onClick={toggleMobileMenu}
         >
-          <Menu className="h-5 w-5" />
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
         <h1 className="text-xl font-semibold text-foreground">
           Sistem Inventory Barang
