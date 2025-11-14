@@ -44,13 +44,13 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    --sidebar-background: 215 30% 12%;
-    --sidebar-foreground: 210 20% 90%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 25% 15%;
     --sidebar-primary: 195 85% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 18%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 215 25% 20%;
+    --sidebar-accent: 210 30% 94%;
+    --sidebar-accent-foreground: 215 25% 15%;
+    --sidebar-border: 214 25% 88%;
     --sidebar-ring: 195 85% 45%;
 
     --chart-1: 195 85% 45%;

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CategoryFormModal } from '@/components/categories/CategoryFormModal';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -21,6 +23,34 @@ const mockCategories = [
 ];
 
 export const CategoriesPage = () => {
+  const { toast } = useToast();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<typeof mockCategories[0] | null>(null);
+
+  const handleAddCategory = () => {
+    setEditingCategory(null);
+    setModalOpen(true);
+  };
+
+  const handleEditCategory = (category: typeof mockCategories[0]) => {
+    setEditingCategory(category);
+    setModalOpen(true);
+  };
+
+  const handleSubmitCategory = (data: any) => {
+    if (editingCategory) {
+      toast({
+        title: 'Category Updated',
+        description: 'Category has been updated successfully.',
+      });
+    } else {
+      toast({
+        title: 'Category Added',
+        description: 'New category has been added successfully.',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -28,7 +58,7 @@ export const CategoriesPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Categories</h1>
           <p className="text-muted-foreground">Manage product categories</p>
         </div>
-        <Button>
+        <Button onClick={handleAddCategory}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Category
         </Button>
@@ -59,7 +89,7 @@ export const CategoriesPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditCategory(category)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon">
@@ -74,6 +104,13 @@ export const CategoriesPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <CategoryFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        category={editingCategory}
+        onSubmit={handleSubmitCategory}
+      />
     </div>
   );
 };
