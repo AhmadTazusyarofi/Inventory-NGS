@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Plus, Calendar, Package } from 'lucide-react';
+import { StockFormModal } from '@/components/stock/StockFormModal';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -43,6 +45,14 @@ const mockStockIn = [
 ];
 
 export const StockInPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = (data: any) => {
+    console.log('Stock IN data:', data);
+    toast.success('Stock IN recorded successfully');
+    // TODO: API call to save stock IN
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -50,7 +60,7 @@ export const StockInPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Stock IN</h1>
           <p className="text-muted-foreground">Record incoming stock</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Stock IN
         </Button>
@@ -134,6 +144,13 @@ export const StockInPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <StockFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+        type="IN"
+      />
     </div>
   );
 };
