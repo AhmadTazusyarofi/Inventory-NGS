@@ -1,0 +1,938 @@
+openapi: 3.0.3
+info:
+  title: NGS Inventory System API - Enhanced Features
+  description: |
+    Additional API endpoints for warehouse management, stock transfers, adjustments, 
+    stock opname, expired items tracking, and user management with roles.
+    
+    This extends the base API defined in openapi.yaml
+  version: 2.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.ngs-inventory.com/api
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "WH-001"
+        name:
+          type: string
+          example: "Main Warehouse"
+        location:
+          type: string
+          example: "Jakarta Pusat"
+        address:
+          type: string
+          example: "Jl. Sudirman No. 123"
+        capacity:
+          type: integer
+          example: 10000
+        currentStock:
+          type: integer
+          example: 7500
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, MAINTENANCE]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    StockTransfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        itemId:
+          type: string
+          format: uuid
+        fromWarehouseId:
+          type: string
+          format: uuid
+        toWarehouseId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, IN_TRANSIT, COMPLETED, CANCELLED]
+        notes:
+          type: string
+        createdBy:
+          type: string
+          format: uuid
+
+    StockAdjustment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        itemId:
+          type: string
+          format: uuid
+        warehouseId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [DAMAGED, LOST, FOUND, CORRECTION]
+        quantity:
+          type: integer
+          description: "Can be negative for decreases"
+        date:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        notes:
+          type: string
+
+    StockOpname:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        opnameNumber:
+          type: string
+          example: "OP-2025-001"
+        warehouseId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [IN_PROGRESS, COMPLETED, CANCELLED]
+        totalItems:
+          type: integer
+        matchedItems:
+          type: integer
+        discrepancy:
+          type: integer
+
+    UserWithRole:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [ADMIN, WAREHOUSE_STAFF]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+        lastLogin:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== WAREHOUSES ====================
+  /warehouses:
+    get:
+      tags:
+        - Warehouses
+      summary: Get all warehouses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, MAINTENANCE]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of warehouses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Warehouse'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      totalItems:
+                        type: integer
+                      totalPages:
+                        type: integer
+
+    post:
+      tags:
+        - Warehouses
+      summary: Create new warehouse (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - name
+                - location
+                - capacity
+              properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                location:
+                  type: string
+                address:
+                  type: string
+                capacity:
+                  type: integer
+                status:
+                  type: string
+                  enum: [ACTIVE, INACTIVE, MAINTENANCE]
+      responses:
+        '201':
+          description: Warehouse created
+        '403':
+          description: Insufficient permissions
+
+  /warehouses/{id}:
+    get:
+      tags:
+        - Warehouses
+      summary: Get warehouse by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse details
+
+    put:
+      tags:
+        - Warehouses
+      summary: Update warehouse (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warehouse'
+      responses:
+        '200':
+          description: Warehouse updated
+
+    delete:
+      tags:
+        - Warehouses
+      summary: Delete warehouse (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse deleted
+        '400':
+          description: Cannot delete warehouse with stock
+
+  # ==================== STOCK TRANSFERS ====================
+  /stock/transfers:
+    get:
+      tags:
+        - Stock Transfers
+      summary: Get all stock transfers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+        - name: itemId
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of transfers
+
+    post:
+      tags:
+        - Stock Transfers
+      summary: Create new stock transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - fromWarehouseId
+                - toWarehouseId
+                - quantity
+                - date
+              properties:
+                itemId:
+                  type: string
+                fromWarehouseId:
+                  type: string
+                toWarehouseId:
+                  type: string
+                quantity:
+                  type: integer
+                date:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Transfer created
+
+  /stock/transfers/{id}/complete:
+    put:
+      tags:
+        - Stock Transfers
+      summary: Complete stock transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transfer completed
+
+  /stock/transfers/{id}/cancel:
+    put:
+      tags:
+        - Stock Transfers
+      summary: Cancel stock transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transfer cancelled
+
+  # ==================== STOCK ADJUSTMENTS ====================
+  /stock/adjustments:
+    get:
+      tags:
+        - Stock Adjustments
+      summary: Get all stock adjustments
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [DAMAGED, LOST, FOUND, CORRECTION]
+      responses:
+        '200':
+          description: List of adjustments
+
+    post:
+      tags:
+        - Stock Adjustments
+      summary: Create stock adjustment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - warehouseId
+                - type
+                - quantity
+                - date
+                - reason
+              properties:
+                itemId:
+                  type: string
+                warehouseId:
+                  type: string
+                type:
+                  type: string
+                  enum: [DAMAGED, LOST, FOUND, CORRECTION]
+                quantity:
+                  type: integer
+                date:
+                  type: string
+                  format: date-time
+                reason:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Adjustment created
+
+  # ==================== STOCK OPNAME ====================
+  /stock/opnames:
+    get:
+      tags:
+        - Stock Opname
+      summary: Get all stock opnames
+      responses:
+        '200':
+          description: List of opnames
+
+    post:
+      tags:
+        - Stock Opname
+      summary: Start new stock opname
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - warehouseId
+                - date
+              properties:
+                warehouseId:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Opname created
+
+  /stock/opnames/{id}:
+    get:
+      tags:
+        - Stock Opname
+      summary: Get opname details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Opname details with items
+
+  /stock/opnames/{id}/details:
+    post:
+      tags:
+        - Stock Opname
+      summary: Add/Update physical stock count
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - physicalStock
+              properties:
+                itemId:
+                  type: string
+                physicalStock:
+                  type: integer
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Physical stock updated
+
+  /stock/opnames/{id}/complete:
+    put:
+      tags:
+        - Stock Opname
+      summary: Complete stock opname
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Opname completed and adjustments created
+
+  # ==================== EXPIRED ITEMS ====================
+  /items/expired:
+    get:
+      tags:
+        - Items
+      summary: Get expired and expiring items
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [expired, critical, warning, all]
+            description: "expired: already expired, critical: < 7 days, warning: < 30 days"
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of expired/expiring items
+
+  /items/expired/summary:
+    get:
+      tags:
+        - Items
+      summary: Get expired items summary
+      responses:
+        '200':
+          description: Count by status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  expired:
+                    type: integer
+                  critical:
+                    type: integer
+                  warning:
+                    type: integer
+
+  # ==================== USER MANAGEMENT ====================
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users (Admin only)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [ADMIN, WAREHOUSE_STAFF]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, SUSPENDED]
+      responses:
+        '200':
+          description: List of users
+        '403':
+          description: Admin access required
+
+    post:
+      tags:
+        - Users
+      summary: Create new user (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - role
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                role:
+                  type: string
+                  enum: [ADMIN, WAREHOUSE_STAFF]
+      responses:
+        '201':
+          description: User created
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+
+    put:
+      tags:
+        - Users
+      summary: Update user (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: User updated
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user (Admin only, cannot delete admins)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted
+        '403':
+          description: Cannot delete admin users
+
+  /users/{id}/role:
+    put:
+      tags:
+        - Users
+      summary: Update user role (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [ADMIN, WAREHOUSE_STAFF]
+      responses:
+        '200':
+          description: Role updated
+
+  /users/{id}/status:
+    put:
+      tags:
+        - Users
+      summary: Update user status (Admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, INACTIVE, SUSPENDED]
+      responses:
+        '200':
+          description: Status updated
+
+  # ==================== ENHANCED REPORTS ====================
+  /reports/stock-by-warehouse:
+    get:
+      tags:
+        - Reports
+      summary: Get current stock grouped by warehouse
+      parameters:
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stock by warehouse
+
+  /reports/stock-movements:
+    get:
+      tags:
+        - Reports
+      summary: Get comprehensive stock movement history
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [IN, OUT, TRANSFER, ADJUSTMENT]
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, pdf, csv]
+      responses:
+        '200':
+          description: Stock movements report
+
+  /reports/low-stock:
+    get:
+      tags:
+        - Reports
+      summary: Get items below minimum stock
+      parameters:
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Low stock items
+
+  /reports/expired-items:
+    get:
+      tags:
+        - Reports
+      summary: Get expired items report
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: warehouseId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expired items report
+
+  # ==================== DASHBOARD ENHANCEMENTS ====================
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard statistics
+      responses:
+        '200':
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                  totalWarehouses:
+                    type: integer
+                  lowStockItems:
+                    type: integer
+                  expiredItems:
+                    type: integer
+                  criticalExpiryItems:
+                    type: integer
+                  todayStockIn:
+                    type: integer
+                  todayStockOut:
+                    type: integer
+                  todayTransfers:
+                    type: integer
+                  pendingOpnames:
+                    type: integer
+
+  /dashboard/alerts:
+    get:
+      tags:
+        - Dashboard
+      summary: Get critical alerts
+      responses:
+        '200':
+          description: Critical alerts for dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lowStock:
+                    type: array
+                    items:
+                      type: object
+                  expired:
+                    type: array
+                    items:
+                      type: object
+                  criticalExpiry:
+                    type: array
+                    items:
+                      type: object
+                  pendingTransfers:
+                    type: array
+                    items:
+                      type: object
+
+  /dashboard/stock-trends:
+    get:
+      tags:
+        - Dashboard
+      summary: Get stock trends for charts
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+      responses:
+        '200':
+          description: Stock trends data
