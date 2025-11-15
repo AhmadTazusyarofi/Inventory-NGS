@@ -11,7 +11,13 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Box
+  Box,
+  Warehouse,
+  ArrowLeftRight,
+  AlertTriangle,
+  ClipboardCheck,
+  Calendar,
+  UserCog
 } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
@@ -21,10 +27,16 @@ const menuItems = [
   { icon: Package, label: 'Items', path: '/items' },
   { icon: FolderTree, label: 'Categories', path: '/categories' },
   { icon: Building2, label: 'Suppliers', path: '/suppliers' },
+  { icon: Warehouse, label: 'Warehouses', path: '/warehouses' },
   { icon: ArrowDownToLine, label: 'Stock In', path: '/stock/in' },
   { icon: ArrowUpFromLine, label: 'Stock Out', path: '/stock/out' },
+  { icon: ArrowLeftRight, label: 'Transfer', path: '/stock/transfer' },
+  { icon: AlertTriangle, label: 'Adjustment', path: '/stock/adjustment' },
+  { icon: ClipboardCheck, label: 'Opname', path: '/stock/opname' },
+  { icon: Calendar, label: 'Expired Items', path: '/expired-items' },
   { icon: FileText, label: 'Reports', path: '/reports' },
   { icon: Activity, label: 'Activity Log', path: '/activity' },
+  { icon: UserCog, label: 'Users', path: '/users' },
   { icon: User, label: 'Profile', path: '/profile' },
 ];
 
