@@ -85,13 +85,13 @@ export const ItemsListPage = () => {
   const handleSubmitItem = (data: any) => {
     if (editingItem) {
       toast({
-        title: 'Item Updated',
-        description: 'Item has been updated successfully.',
+        title: 'Barang Diperbarui',
+        description: 'Barang telah diperbarui dengan sukses.',
       });
     } else {
       toast({
-        title: 'Item Added',
-        description: 'New item has been added successfully.',
+        title: 'Barang Ditambahkan',
+        description: 'Barang baru telah ditambahkan dengan sukses.',
       });
     }
   };

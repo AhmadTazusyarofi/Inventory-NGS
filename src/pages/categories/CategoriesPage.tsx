@@ -40,13 +40,13 @@ export const CategoriesPage = () => {
   const handleSubmitCategory = (data: any) => {
     if (editingCategory) {
       toast({
-        title: 'Category Updated',
-        description: 'Category has been updated successfully.',
+        title: 'Kategori Diperbarui',
+        description: 'Kategori telah diperbarui dengan sukses.',
       });
     } else {
       toast({
-        title: 'Category Added',
-        description: 'New category has been added successfully.',
+        title: 'Kategori Ditambahkan',
+        description: 'Kategori baru telah ditambahkan dengan sukses.',
       });
     }
   };
@@ -55,28 +55,28 @@ export const CategoriesPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Categories</h1>
-          <p className="text-muted-foreground">Manage product categories</p>
+          <h1 className="text-3xl font-bold text-foreground">Kategori</h1>
+          <p className="text-muted-foreground">Kelola kategori produk</p>
         </div>
         <Button onClick={handleAddCategory}>
           <Plus className="mr-2 h-4 w-4" />
-          Add New Category
+          Tambah Kategori Baru
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Categories ({mockCategories.length})</CardTitle>
+          <CardTitle>Semua Kategori ({mockCategories.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Items Count</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Nama</TableHead>
+                  <TableHead>Deskripsi</TableHead>
+                  <TableHead>Jumlah Barang</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

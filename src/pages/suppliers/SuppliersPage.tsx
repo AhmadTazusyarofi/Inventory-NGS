@@ -62,13 +62,13 @@ export const SuppliersPage = () => {
   const handleSubmitSupplier = (data: any) => {
     if (editingSupplier) {
       toast({
-        title: 'Supplier Updated',
-        description: 'Supplier has been updated successfully.',
+        title: 'Pemasok Diperbarui',
+        description: 'Pemasok telah diperbarui dengan sukses.',
       });
     } else {
       toast({
-        title: 'Supplier Added',
-        description: 'New supplier has been added successfully.',
+        title: 'Pemasok Ditambahkan',
+        description: 'Pemasok baru telah ditambahkan dengan sukses.',
       });
     }
   };
@@ -77,28 +77,28 @@ export const SuppliersPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Suppliers</h1>
-          <p className="text-muted-foreground">Manage your suppliers</p>
+          <h1 className="text-3xl font-bold text-foreground">Pemasok</h1>
+          <p className="text-muted-foreground">Kelola pemasok Anda</p>
         </div>
         <Button onClick={handleAddSupplier}>
           <Plus className="mr-2 h-4 w-4" />
-          Add New Supplier
+          Tambah Pemasok Baru
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Suppliers ({mockSuppliers.length})</CardTitle>
+          <CardTitle>Semua Pemasok ({mockSuppliers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Nama</TableHead>
+                  <TableHead>Kontak</TableHead>
+                  <TableHead>Alamat</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
