@@ -23,21 +23,21 @@ import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: Package, label: 'Items', path: '/items' },
-  { icon: FolderTree, label: 'Categories', path: '/categories' },
-  { icon: Building2, label: 'Suppliers', path: '/suppliers' },
-  { icon: Warehouse, label: 'Warehouses', path: '/warehouses' },
-  { icon: ArrowDownToLine, label: 'Stock In', path: '/stock/in' },
-  { icon: ArrowUpFromLine, label: 'Stock Out', path: '/stock/out' },
-  { icon: ArrowLeftRight, label: 'Transfer', path: '/stock/transfer' },
-  { icon: AlertTriangle, label: 'Adjustment', path: '/stock/adjustment' },
-  { icon: ClipboardCheck, label: 'Opname', path: '/stock/opname' },
-  { icon: Calendar, label: 'Expired Items', path: '/expired-items' },
-  { icon: FileText, label: 'Reports', path: '/reports' },
-  { icon: Activity, label: 'Activity Log', path: '/activity' },
-  { icon: UserCog, label: 'Users', path: '/users' },
-  { icon: User, label: 'Profile', path: '/profile' },
+  { icon: LayoutDashboard, label: 'Dasbor', path: '/dashboard' },
+  { icon: Package, label: 'Barang', path: '/items' },
+  { icon: FolderTree, label: 'Kategori', path: '/categories' },
+  { icon: Building2, label: 'Pemasok', path: '/suppliers' },
+  { icon: Warehouse, label: 'Gudang', path: '/warehouses' },
+  { icon: ArrowDownToLine, label: 'Stok Masuk', path: '/stock/in' },
+  { icon: ArrowUpFromLine, label: 'Stok Keluar', path: '/stock/out' },
+  { icon: ArrowLeftRight, label: 'Transfer Stok', path: '/stock/transfer' },
+  { icon: AlertTriangle, label: 'Penyesuaian', path: '/stock/adjustment' },
+  { icon: ClipboardCheck, label: 'Stok Opname', path: '/stock/opname' },
+  { icon: Calendar, label: 'Barang Kadaluarsa', path: '/expired-items' },
+  { icon: FileText, label: 'Laporan', path: '/reports' },
+  { icon: Activity, label: 'Log Aktivitas', path: '/activity' },
+  { icon: UserCog, label: 'Pengguna', path: '/users' },
+  { icon: User, label: 'Profil', path: '/profile' },
 ];
 
 export const Sidebar = () => {

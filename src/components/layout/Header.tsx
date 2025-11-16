@@ -75,12 +75,12 @@ export const Header = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Profil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Keluar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

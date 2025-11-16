@@ -78,12 +78,12 @@ export const WarehousesPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Warehouses</h1>
-          <p className="text-muted-foreground">Manage warehouse locations</p>
+          <h1 className="text-3xl font-bold text-foreground">Gudang</h1>
+          <p className="text-muted-foreground">Kelola lokasi gudang</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Warehouse
+          Tambah Gudang
         </Button>
       </div>
 
