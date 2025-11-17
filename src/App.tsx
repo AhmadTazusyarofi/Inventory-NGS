@@ -19,6 +19,7 @@ import { ReportsPage } from "./pages/reports/ReportsPage";
 import { UsersManagementPage } from "./pages/users/UsersManagementPage";
 import { ActivityLogPage } from "./pages/activity/ActivityLogPage";
 import { UserProfilePage } from "./pages/profile/UserProfilePage";
+import { SettingsPage } from "./pages/settings/SettingsPage";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="activity" element={<ActivityLogPage />} />
             <Route path="users" element={<UsersManagementPage />} />
             <Route path="profile" element={<UserProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

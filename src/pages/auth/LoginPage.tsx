@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useAuthStore();
+  const { appName, appLogo } = useSettingsStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,15 +48,19 @@ export const LoginPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-            <Box className="h-6 w-6 text-primary-foreground" />
+            {appLogo ? (
+              <img src={appLogo} alt="Logo" className="h-8 w-8 object-contain" />
+            ) : (
+              <Box className="h-6 w-6 text-primary-foreground" />
+            )}
           </div>
-          <CardTitle className="text-2xl font-bold">NGS Inventory</CardTitle>
-          <CardDescription>Enter your credentials to access the system</CardDescription>
+          <CardTitle className="text-2xl font-bold">{appName} Inventory</CardTitle>
+          <CardDescription>Masukkan kredensial Anda untuk mengakses sistem</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Alamat Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -65,7 +71,7 @@ export const LoginPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input
                 id="password"
                 type="password"
@@ -77,16 +83,16 @@ export const LoginPage = () => {
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
-                'Logging in...'
+                'Sedang masuk...'
               ) : (
                 <>
                   <LogIn className="mr-2 h-4 w-4" />
-                  Login
+                  Masuk
                 </>
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Demo: Use any email and password to login
+              Demo: Gunakan email dan password apa saja untuk masuk
             </p>
           </form>
         </CardContent>

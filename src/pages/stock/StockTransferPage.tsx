@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, ArrowRight, Calendar, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StockTransferFormModal } from '@/components/stock/StockTransferFormModal';
 import {
   Table,
   TableBody,
@@ -54,10 +55,15 @@ const mockTransfers = [
 
 export const StockTransferPage = () => {
   const [transfers] = useState(mockTransfers);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAdd = () => {
-    toast.success('Add transfer modal will open');
-    // TODO: Open modal
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data: any) => {
+    console.log('Transfer data:', data);
+    toast.success('Transfer stok berhasil dibuat');
   };
 
   const getStatusColor = (status: string) => {
@@ -163,9 +169,11 @@ export const StockTransferPage = () => {
                         {transfer.toWarehouse}
                       </div>
                     </TableCell>
-                    <TableCell>
+                     <TableCell>
                       <Badge variant="default" className={getStatusColor(transfer.status)}>
-                        {transfer.status}
+                        {transfer.status === 'completed' ? 'Selesai' : 
+                         transfer.status === 'in-transit' ? 'Dalam Perjalanan' : 
+                         transfer.status === 'cancelled' ? 'Dibatalkan' : transfer.status}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -181,6 +189,12 @@ export const StockTransferPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <StockTransferFormModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

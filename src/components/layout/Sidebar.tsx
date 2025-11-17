@@ -17,9 +17,11 @@ import {
   AlertTriangle,
   ClipboardCheck,
   Calendar,
-  UserCog
+  UserCog,
+  Settings
 } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
@@ -37,11 +39,13 @@ const menuItems = [
   { icon: FileText, label: 'Laporan', path: '/reports' },
   { icon: Activity, label: 'Log Aktivitas', path: '/activity' },
   { icon: UserCog, label: 'Pengguna', path: '/users' },
+  { icon: Settings, label: 'Pengaturan', path: '/settings' },
   { icon: User, label: 'Profil', path: '/profile' },
 ];
 
 export const Sidebar = () => {
   const { sidebarCollapsed, toggleSidebar, mobileMenuOpen, setMobileMenuOpen } = useUIStore();
+  const { appName, appLogo } = useSettingsStore();
 
   return (
     <aside
@@ -57,8 +61,12 @@ export const Sidebar = () => {
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-2">
-              <Box className="h-6 w-6 text-sidebar-primary" />
-              <span className="text-lg font-bold text-sidebar-foreground">NGS</span>
+              {appLogo ? (
+                <img src={appLogo} alt="Logo" className="h-6 w-6 object-contain" />
+              ) : (
+                <Box className="h-6 w-6 text-sidebar-primary" />
+              )}
+              <span className="text-lg font-bold text-sidebar-foreground">{appName}</span>
             </div>
           )}
           <button

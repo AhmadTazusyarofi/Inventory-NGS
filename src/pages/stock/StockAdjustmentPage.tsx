@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Calendar, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StockAdjustmentFormModal } from '@/components/stock/StockAdjustmentFormModal';
 import {
   Table,
   TableBody,
@@ -62,10 +63,15 @@ const mockAdjustments = [
 
 export const StockAdjustmentPage = () => {
   const [adjustments] = useState(mockAdjustments);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAdd = () => {
-    toast.success('Add adjustment modal will open');
-    // TODO: Open modal
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data: any) => {
+    console.log('Adjustment data:', data);
+    toast.success('Penyesuaian stok berhasil dibuat');
   };
 
   const getTypeColor = (type: string) => {
@@ -85,10 +91,10 @@ export const StockAdjustmentPage = () => {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      damaged: 'Damaged',
-      lost: 'Lost',
-      found: 'Found',
-      correction: 'Correction',
+      damaged: 'Rusak',
+      lost: 'Hilang',
+      found: 'Ditemukan',
+      correction: 'Koreksi',
     };
     return labels[type] || type;
   };
@@ -200,6 +206,12 @@ export const StockAdjustmentPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <StockAdjustmentFormModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };
