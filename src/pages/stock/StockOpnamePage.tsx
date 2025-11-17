@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StockOpnameFormModal } from '@/components/stock/StockOpnameFormModal';
 import {
   Table,
   TableBody,
@@ -82,10 +83,15 @@ const mockOpnameDetails = [
 export const StockOpnamePage = () => {
   const [opnames] = useState(mockOpnames);
   const [details] = useState(mockOpnameDetails);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAdd = () => {
-    toast.success('Start new stock opname');
-    // TODO: Open modal
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (data: any) => {
+    console.log('Opname data:', data);
+    toast.success('Stok opname berhasil dimulai');
   };
 
   const getStatusColor = (status: string) => {
@@ -101,6 +107,15 @@ export const StockOpnamePage = () => {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      completed: 'Selesai',
+      'in-progress': 'Sedang Berjalan',
+      cancelled: 'Dibatalkan',
+    };
+    return labels[status] || status;
+  };
+
   const getDetailStatusIcon = (status: string) => {
     switch (status) {
       case 'match':
@@ -114,16 +129,25 @@ export const StockOpnamePage = () => {
     }
   };
 
+  const getDetailStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      match: 'Sesuai',
+      shortage: 'Kurang',
+      excess: 'Lebih',
+    };
+    return labels[status] || status;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Stock Opname</h1>
-          <p className="text-muted-foreground">Physical stock verification</p>
+          <h1 className="text-3xl font-bold text-foreground">Stok Opname</h1>
+          <p className="text-muted-foreground">Verifikasi fisik stok barang</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
-          Start Opname
+          Mulai Opname
         </Button>
       </div>
 
@@ -203,7 +227,7 @@ export const StockOpnamePage = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="default" className={getStatusColor(opname.status)}>
-                        {opname.status}
+                        {getStatusLabel(opname.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -259,7 +283,7 @@ export const StockOpnamePage = () => {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getDetailStatusIcon(detail.status)}
-                        <span className="capitalize">{detail.status}</span>
+                        <span className="capitalize">{getDetailStatusLabel(detail.status)}</span>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -269,6 +293,12 @@ export const StockOpnamePage = () => {
           </div>
         </CardContent>
       </Card>
+
+      <StockOpnameFormModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

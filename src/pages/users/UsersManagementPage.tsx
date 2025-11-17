@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Edit, Trash2, Shield, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { UserFormModal } from '@/components/users/UserFormModal';
 import {
   Table,
   TableBody,
@@ -54,20 +55,31 @@ const mockUsers = [
 
 export const UsersManagementPage = () => {
   const [users] = useState(mockUsers);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
 
   const handleAdd = () => {
-    toast.success('Add user modal will open');
-    // TODO: Open modal
+    setEditingUser(null);
+    setIsModalOpen(true);
   };
 
-  const handleEdit = (id: string) => {
-    toast.info(`Edit user ${id}`);
-    // TODO: Open edit modal
+  const handleEdit = (user: any) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    toast.error(`Delete user ${id}`);
+    toast.error(`Hapus pengguna ${id}`);
     // TODO: Show confirmation dialog
+  };
+
+  const handleSubmit = (data: any) => {
+    console.log('User data:', data);
+    if (editingUser) {
+      toast.success('Pengguna berhasil diperbarui');
+    } else {
+      toast.success('Pengguna berhasil ditambahkan');
+    }
   };
 
   const getRoleColor = (role: string) => {
@@ -84,7 +96,7 @@ export const UsersManagementPage = () => {
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
       admin: 'Admin',
-      warehouse_staff: 'Warehouse Staff',
+      warehouse_staff: 'Staff Gudang',
     };
     return labels[role] || role;
   };
@@ -101,12 +113,12 @@ export const UsersManagementPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-          <p className="text-muted-foreground">Manage users and their roles</p>
+          <h1 className="text-3xl font-bold text-foreground">Manajemen Pengguna</h1>
+          <p className="text-muted-foreground">Kelola pengguna dan role mereka</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
-          Add User
+          Tambah Pengguna
         </Button>
       </div>
 
@@ -116,7 +128,7 @@ export const UsersManagementPage = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Users</p>
+                <p className="text-sm text-muted-foreground">Total Pengguna</p>
                 <p className="text-2xl font-bold">{users.length}</p>
               </div>
               <UserIcon className="h-8 w-8 text-primary" />
@@ -149,7 +161,7 @@ export const UsersManagementPage = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-sm text-muted-foreground">Aktif</p>
                 <p className="text-2xl font-bold text-success">{activeCount}</p>
               </div>
               <UserIcon className="h-8 w-8 text-success" />
@@ -161,21 +173,21 @@ export const UsersManagementPage = () => {
       {/* Users Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
+          <CardTitle>Semua Pengguna</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Created At</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
+              <TableRow>
+                <TableHead>Nama</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Login Terakhir</TableHead>
+                <TableHead>Dibuat</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
+              </TableRow>
               </TableHeader>
               <TableBody>
                 {users.map((user) => (
@@ -189,7 +201,7 @@ export const UsersManagementPage = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="default" className={getStatusColor(user.status)}>
-                        {user.status}
+                        {user.status === 'active' ? 'Aktif' : 'Nonaktif'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{user.lastLogin}</TableCell>
@@ -201,7 +213,7 @@ export const UsersManagementPage = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEdit(user.id)}
+                          onClick={() => handleEdit(user)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -226,7 +238,7 @@ export const UsersManagementPage = () => {
       {/* Role Permissions Info */}
       <Card>
         <CardHeader>
-          <CardTitle>Role Permissions</CardTitle>
+          <CardTitle>Izin Role</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -236,23 +248,28 @@ export const UsersManagementPage = () => {
                 <h3 className="font-semibold">Admin</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Full access to all features including user management, reports, stock management, and
-                system settings.
+                Akses penuh ke semua fitur termasuk manajemen pengguna, laporan, manajemen stok, dan pengaturan sistem.
               </p>
             </div>
             <div className="rounded-lg border border-border p-4">
               <div className="flex items-center gap-2 mb-2">
                 <UserIcon className="h-5 w-5 text-accent" />
-                <h3 className="font-semibold">Warehouse Staff</h3>
+                <h3 className="font-semibold">Staff Gudang</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Can manage items, stock movements, stock opname, and view reports. Cannot access user
-                management or system settings.
+                Dapat mengelola barang, pergerakan stok, stok opname, dan melihat laporan. Tidak dapat mengakses manajemen pengguna atau pengaturan sistem.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <UserFormModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        user={editingUser}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };
