@@ -1,0 +1,264 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  nama          String          @db.VarChar(100)
+  username      String          @unique @db.VarChar(50)
+  email         String          @unique @db.VarChar(100)
+  password_hash String          @db.VarChar(255)
+  role          String          @db.VarChar(50)   // admin, staf_gudang
+  aktif         Boolean
+  last_login_at DateTime?       @db.DateTime(0)
+  created_at    DateTime        @default(now()) @db.DateTime(0)
+  updated_at    DateTime        @updatedAt @db.DateTime(0)
+
+  // Relations
+  mutasi_stok   MutasiStok[]
+  transfer_stok TransferStok[]
+  opname_stok   OpnameStok[]
+  log_aktivitas LogAktivitas[]
+
+  @@map("user")
+}
+
+model Gudang {
+  id         Int           @id @default(autoincrement())
+  kode       String        @unique @db.VarChar(20)
+  nama       String        @db.VarChar(100)
+  lokasi     String        @db.VarChar(100)
+  alamat     String        @db.Text
+  kapasitas  Int?
+  status     String        @db.VarChar(20) // aktif, non_aktif
+  created_at DateTime      @default(now()) @db.DateTime(0)
+  updated_at DateTime      @updatedAt @db.DateTime(0)
+
+  // Relations
+  stok_gudang      StokGudang[]
+  batch_barang     BatchBarang[]
+  mutasi_stok      MutasiStok[]
+  transfer_asal    TransferStok[] @relation("GudangAsal")
+  transfer_tujuan  TransferStok[] @relation("GudangTujuan")
+  opname_stok      OpnameStok[]
+
+  @@map("gudang")
+}
+
+model Kategori {
+  id         Int       @id @default(autoincrement())
+  nama       String    @db.VarChar(100)
+  deskripsi  String?   @db.Text
+  created_at DateTime  @default(now()) @db.DateTime(0)
+  updated_at DateTime  @updatedAt @db.DateTime(0)
+
+  barang Barang[]
+
+  @@map("kategori")
+}
+
+model Supplier {
+  id         Int       @id @default(autoincrement())
+  nama       String    @db.VarChar(150)
+  telepon    String    @db.VarChar(30)
+  email      String    @db.VarChar(100)
+  alamat     String    @db.Text
+  kota       String?   @db.VarChar(100)
+  provinsi   String?   @db.VarChar(100)
+  created_at DateTime  @default(now()) @db.DateTime(0)
+  updated_at DateTime  @updatedAt @db.DateTime(0)
+
+  barang Barang[]
+
+  @@map("suppliers")
+}
+
+model Barang {
+  id           Int       @id @default(autoincrement())
+  kode         String    @unique @db.VarChar(50)
+  nama         String    @db.VarChar(150)
+  id_kategori  Int
+  id_supplier  Int
+  satuan       String    @db.VarChar(50)
+  stok         Int?
+  stok_minimum Int
+  deskripsi    String?   @db.Text
+  url_gambar   String?   @db.VarChar(255)
+  created_at   DateTime  @default(now()) @db.DateTime(0)
+  updated_at   DateTime  @updatedAt @db.DateTime(0)
+
+  kategori Kategori @relation(fields: [id_kategori], references: [id])
+  supplier Supplier @relation(fields: [id_supplier], references: [id])
+
+  stok_gudang          StokGudang[]
+  batch_barang         BatchBarang[]
+  mutasi_stok          MutasiStok[]
+  detail_transfer_stok DetailTransferStok[]
+  detail_opname_stok   DetailOpnameStok[]
+
+  @@index([id_kategori])
+  @@index([id_supplier])
+
+  @@map("barang")
+}
+
+model StokGudang {
+  id         Int      @id @default(autoincrement())
+  id_barang  Int
+  id_gudang  Int
+  stok_now   Int
+  created_at DateTime @default(now()) @db.DateTime(0)
+  updated_at DateTime @updatedAt @db.DateTime(0)
+
+  barang Barang @relation(fields: [id_barang], references: [id])
+  gudang Gudang @relation(fields: [id_gudang], references: [id])
+
+  @@unique([id_barang, id_gudang])
+
+  @@map("stok_gudang")
+}
+
+model BatchBarang {
+  id                  Int       @id @default(autoincrement())
+  id_barang           Int
+  id_gudang           Int
+  nomor_batch         String    @db.VarChar(50)
+  tanggal_kedaluwarsa DateTime  @db.Date
+  jumlah              Int
+  created_at          DateTime  @default(now()) @db.DateTime(0)
+  updated_at          DateTime  @updatedAt @db.DateTime(0)
+
+  barang Barang @relation(fields: [id_barang], references: [id])
+  gudang Gudang @relation(fields: [id_gudang], references: [id])
+
+  mutasi_stok             MutasiStok[]
+  detail_opname_stok      DetailOpnameStok[]
+  detail_transfer_asal    DetailTransferStok[] @relation("BatchAsal")
+  detail_transfer_tujuan  DetailTransferStok[] @relation("BatchTujuan")
+
+  @@map("batch_barang")
+}
+
+model MutasiStok {
+  id                Int      @id @default(autoincrement())
+  id_barang         Int
+  id_gudang         Int
+  jenis_mutasi      String   @db.VarChar(20) // masuk, keluar, penyesuaian
+  jumlah            Int
+  jenis_penyesuaian String?  @db.VarChar(20) // rusak, hilang, ditemukan
+  id_batch          Int?
+  nomor_referensi   String?  @db.VarChar(50)
+  catatan           String?  @db.Text
+  dibuat_oleh       Int
+  created_at        DateTime @default(now()) @db.DateTime(0)
+
+  barang Barang       @relation(fields: [id_barang], references: [id])
+  gudang Gudang       @relation(fields: [id_gudang], references: [id])
+  batch  BatchBarang? @relation(fields: [id_batch], references: [id])
+  user   User         @relation(fields: [dibuat_oleh], references: [id])
+
+  @@index([id_barang])
+  @@index([id_gudang])
+  @@index([jenis_mutasi])
+  @@index([created_at])
+
+  @@map("mutasi_stok")
+}
+
+model TransferStok {
+  id               Int      @id @default(autoincrement())
+  nomor_transfer   String   @unique @db.VarChar(50)
+  id_gudang_asal   Int
+  id_gudang_tujuan Int
+  tanggal          DateTime @db.DateTime(0)
+  status           String   @db.VarChar(20) // draft, selesai, dibatalkan
+  catatan          String?  @db.Text
+  dibuat_oleh      Int
+  created_at       DateTime @default(now()) @db.DateTime(0)
+  updated_at       DateTime @updatedAt @db.DateTime(0)
+
+  gudang_asal   Gudang @relation("GudangAsal", fields: [id_gudang_asal], references: [id])
+  gudang_tujuan Gudang @relation("GudangTujuan", fields: [id_gudang_tujuan], references: [id])
+  user          User   @relation(fields: [dibuat_oleh], references: [id])
+
+  detail DetailTransferStok[]
+
+  @@map("transfer_stok")
+}
+
+model DetailTransferStok {
+  id              Int       @id @default(autoincrement())
+  id_transfer     Int
+  id_barang       Int
+  jumlah          Int
+  id_batch_asal   Int?
+  id_batch_tujuan Int?
+  created_at      DateTime  @default(now()) @db.DateTime(0)
+  updated_at      DateTime  @updatedAt @db.DateTime(0)
+
+  transfer     TransferStok @relation(fields: [id_transfer], references: [id])
+  barang       Barang       @relation(fields: [id_barang], references: [id])
+  batch_asal   BatchBarang? @relation("BatchAsal", fields: [id_batch_asal], references: [id])
+  batch_tujuan BatchBarang? @relation("BatchTujuan", fields: [id_batch_tujuan], references: [id])
+
+  @@map("detail_transfer_stok")
+}
+
+model OpnameStok {
+  id            Int       @id @default(autoincrement())
+  nomor_opname  String    @unique @db.VarChar(50)
+  id_gudang     Int
+  tanggal       DateTime  @db.DateTime(0)
+  status        String    @db.VarChar(20) // draft, proses, selesai
+  total_item    Int
+  total_selisih Int
+  dibuat_oleh   Int
+  created_at    DateTime  @default(now()) @db.DateTime(0)
+  updated_at    DateTime  @updatedAt @db.DateTime(0)
+
+  gudang Gudang @relation(fields: [id_gudang], references: [id])
+  user   User   @relation(fields: [dibuat_oleh], references: [id])
+
+  detail DetailOpnameStok[]
+
+  @@map("opname_stok")
+}
+
+model DetailOpnameStok {
+  id          Int       @id @default(autoincrement())
+  id_opname   Int
+  id_barang   Int
+  stok_sistem Int
+  stok_fisik  Int
+  selisih     Int
+  status      String    @db.VarChar(20) // sesuai, lebih, kurang
+  id_batch    Int?
+  created_at  DateTime  @default(now()) @db.DateTime(0)
+  updated_at  DateTime  @updatedAt @db.DateTime(0)
+
+  opname OpnameStok   @relation(fields: [id_opname], references: [id])
+  barang Barang       @relation(fields: [id_barang], references: [id])
+  batch  BatchBarang? @relation(fields: [id_batch], references: [id])
+
+  @@map("detail_opname_stok")
+}
+
+model LogAktivitas {
+  id         Int      @id @default(autoincrement())
+  id_user    Int
+  aksi       String   @db.VarChar(100)
+  deskripsi  String   @db.Text
+  created_at DateTime @default(now()) @db.DateTime(0)
+
+  user User @relation(fields: [id_user], references: [id])
+
+  @@index([id_user])
+  @@index([created_at])
+
+  @@map("log_aktivitas")
+}
